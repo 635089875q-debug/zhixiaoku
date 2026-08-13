@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>知晓库｜RAG 知识库助手</title>
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"
+    ></script>
+
+    <link
+        rel="stylesheet"
+        href="./style.css"
+    >
+
+    <script
+        src="./app.js"
+        defer
+    ></script>
+</head>
+
+<body class="bg-stone-50 text-stone-900 antialiased">
+    <section
+        id="authScreen"
+        class="authScreen"
+        aria-labelledby="authTitle"
+    >
+        <div class="authCard">
+            <div class="authBrand">
+                <div class="authBrandAvatar">
+                    <img
+                        src="./assets/zhixiaoku.png"
+                        alt="知晓库助手小库"
+                    >
+                </div>
+
+                <div>
+                    <strong>知晓库</strong>
+                    <span>RAG 知识库助手</span>
+                </div>
+            </div>
+
+            <div class="authHeading">
+                <p>WELCOME</p>
+                <h1 id="authTitle">登录知晓库</h1>
+                <span id="authDescription">
+                    登录后继续使用你的知识库与会话记录
+                </span>
+            </div>
+
+            <div class="authTabs" role="tablist">
+                <button
+                    id="loginTabButton"
+                    class="authTab isActive"
+                    type="button"
+                    role="tab"
+                    aria-selected="true"
+                >
+                    登录
+                </button>
+                <button
+                    id="registerTabButton"
+                    class="authTab"
+                    type="button"
+                    role="tab"
+                    aria-selected="false"
+                >
+                    注册
+                </button>
+            </div>
+
+            <form id="authForm" class="authForm">
+                <label class="authField">
+                    <span>用户名</span>
+                    <input
+                        id="authUsernameInput"
+                        name="username"
+                        type="text"
+                        minlength="3"
+                        maxlength="50"
+                        autocomplete="username"
+                        placeholder="请输入用户名"
+                        required
+                    >
+                </label>
+
+                <label class="authField">
+                    <span>密码</span>
+                    <input
+                        id="authPasswordInput"
+                        name="password"
+                        type="password"
+                        minlength="8"
+                        maxlength="128"
+                        autocomplete="current-password"
+                        placeholder="请输入密码"
+                        required
+                    >
+                </label>
+
+                <label
+                    id="confirmPasswordField"
+                    class="authField"
+                    hidden
+                >
+                    <span>确认密码</span>
+                    <input
+                        id="authConfirmPasswordInput"
+                        name="confirm_password"
+                        type="password"
+                        minlength="8"
+                        maxlength="128"
+                        autocomplete="new-password"
+                        placeholder="请再次输入密码"
+                    >
+                </label>
+
+                <p id="authStatus" class="authStatus" aria-live="polite"></p>
+
+                <button
+                    id="authSubmitButton"
+                    class="authSubmitButton"
+                    type="submit"
+                >
+                    <span id="authSubmitLabel">登录</span>
+                    <span aria-hidden="true">→</span>
+                </button>
+            </form>
+
+            <p class="authFooter">
+                登录即代表进入你的独立会话空间
+            </p>
+        </div>
+    </section>
+
+    <div id="appShell" class="appShell" hidden>
+        <aside
+            id="conversationSidebar"
+            class="conversationSidebar"
+        >
+            <header class="conversationSidebarHeader">
+                <div>
+                    <p>CONVERSATIONS</p>
+                    <h2>我的会话</h2>
+                </div>
+
+                <button
+                    id="closeConversationButton"
+                    class="closeConversationButton"
+                    type="button"
+                    aria-label="关闭会话侧栏"
+                >
+                    ×
+                </button>
+            </header>
+
+            <button
+                id="newConversationButton"
+                class="newConversationButton"
+                type="button"
+            >
+                <span>＋</span>
+                新建会话
+            </button>
+
+            <p id="conversationStatus">
+                正在加载会话…
+            </p>
+
+            <ul
+                id="conversationList"
+                aria-live="polite"
+            ></ul>
+
+            <button
+                id="loadMoreConversationsButton"
+                class="loadMoreButton"
+                type="button"
+                hidden
+            >
+                加载更早会话
+            </button>
+
+            <div class="conversationSidebarFooter">
+                <span class="statusDot"></span>
+                会话记忆已启用
+            </div>
+        </aside>
+
+        <main class="chatWorkspace">
+            <header class="chatTopbar">
+                <div class="brandGroup">
+                    <div class="brandAvatar">
+                        <img
+                            src="./assets/zhixiaoku.png"
+                            alt="知晓库助手小库"
+                        >
+                    </div>
+
+                    <div>
+                        <h1>知晓库</h1>
+                        <p>RAG 知识库助手</p>
+                    </div>
+                </div>
+
+                <nav
+                    class="primaryNav"
+                    aria-label="主要功能"
+                >
+                    <button
+                        id="mobileConversationButton"
+                        class="topbarNavButton mobileConversationButton"
+                        type="button"
+                    >
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            aria-hidden="true"
+                        >
+                            <path
+                                d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"
+                            ></path>
+                            <circle
+                                cx="8"
+                                cy="11"
+                                r="0.75"
+                                fill="currentColor"
+                                stroke="none"
+                            ></circle>
+                            <circle
+                                cx="12"
+                                cy="11"
+                                r="0.75"
+                                fill="currentColor"
+                                stroke="none"
+                            ></circle>
+                            <circle
+                                cx="16"
+                                cy="11"
+                                r="0.75"
+                                fill="currentColor"
+                                stroke="none"
+                            ></circle>
+                        </svg>
+                        <span>会话</span>
+                    </button>
+
+                    <button
+                        id="mobileKnowledgeButton"
+                        class="topbarNavButton mobileKnowledgeButton"
+                        type="button"
+                    >
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            aria-hidden="true"
+                        >
+                            <path
+                                d="M2 4.5A2.5 2.5 0 0 1 4.5 2H9a3 3 0 0 1 3 3v17a4 4 0 0 0-4-4H2Z"
+                            ></path>
+                            <path
+                                d="M22 4.5A2.5 2.5 0 0 0 19.5 2H15a3 3 0 0 0-3 3v17a4 4 0 0 1 4-4h6Z"
+                            ></path>
+                        </svg>
+                        <span>知识库</span>
+                    </button>
+                </nav>
+
+                <div class="topbarActions">
+
+                    <div
+                        id="modelBadge"
+                        class="modelBadge"
+                        title="正在读取当前模型"
+                    >
+                        <span class="modelDot"></span>
+                        <strong id="currentModelName">
+                            读取中……
+                        </strong>
+                    </div>
+
+                    <div class="currentUserControl">
+                        <span
+                            id="currentUserInitial"
+                            class="currentUserAvatar"
+                            aria-hidden="true"
+                        >
+                            U
+                        </span>
+                        <span class="currentUserText">
+                            <small id="currentUserRole">当前用户</small>
+                            <strong id="currentUsername">读取中…</strong>
+                        </span>
+                    </div>
+
+                    <button
+                        id="loadHistoryButton"
+                        class="iconButton"
+                        type="button"
+                        title="刷新会话"
+                        aria-label="刷新会话"
+                    >
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            aria-hidden="true"
+                        >
+                            <path d="M20 11a8 8 0 1 0-2.34 5.66"></path>
+                            <path d="M20 5v6h-6"></path>
+                        </svg>
+                    </button>
+
+                    <button
+                        id="logoutButton"
+                        class="logoutButton"
+                        type="button"
+                    >
+                        退出
+                    </button>
+                </div>
+            </header>
+
+            <div
+                id="chatScroll"
+                class="conversationScroll"
+            >
+                <div class="conversationInner">
+                    <section class="welcomeBlock">
+                        <div class="welcomeIcon">✦</div>
+                        <h2>今天想了解什么？</h2>
+                        <p>
+                            我是小库，会从知识库中检索资料并标注回答来源。
+                        </p>
+                    </section>
+
+                    <p id="historyStatus">
+                        正在加载聊天记录……
+                    </p>
+
+                    <button
+                        id="loadOlderMessagesButton"
+                        class="loadOlderMessagesButton"
+                        type="button"
+                        hidden
+                    >
+                        加载更早消息
+                    </button>
+
+                    <div
+                        id="historyList"
+                        aria-live="polite"
+                    ></div>
+
+                    <section
+                        id="sourcePanel"
+                        class="sourcePanel"
+                        hidden
+                    >
+                        <div class="sourcePanelHeader">
+                            <span>参考来源</span>
+                            <span class="sourceHint">本次回答</span>
+                        </div>
+
+                        <div id="sourcesBox">
+                            暂无来源
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <footer class="composerDock">
+                <div class="composerCard">
+                    <label
+                        class="srOnly"
+                        for="questionInput"
+                    >
+                        请输入问题
+                    </label>
+
+                    <textarea
+                        id="questionInput"
+                        rows="1"
+                        placeholder="询问知识库中的任何内容……"
+                    ></textarea>
+
+                    <div class="composerActions">
+                        <span>Enter 发送 · Shift + Enter 换行</span>
+
+                        <button
+                            id="sendButton"
+                            type="button"
+                            aria-label="发送问题"
+                        >
+                            <span id="sendButtonLabel">发送</span>
+                            <span class="sendArrow">↑</span>
+                        </button>
+                    </div>
+                </div>
+
+                <p class="composerNotice">
+                    AI 可能会出错，请结合参考来源核实重要信息。
+                </p>
+
+                <p
+                    id="answerBox"
+                    class="srOnly"
+                    aria-live="polite"
+                >
+                    等待提问
+                </p>
+            </footer>
+        </main>
+
+        <aside
+            id="knowledgeSection"
+            class="knowledgeSidebar"
+        >
+            <header class="knowledgeHeader">
+                <div>
+                    <p>KNOWLEDGE</p>
+                    <h2>知识库</h2>
+                </div>
+
+                <div class="knowledgeHeaderActions">
+                    <button
+                        id="rebuildButton"
+                        class="ghostButton adminOnly"
+                        type="button"
+                    >
+                        重新建库
+                    </button>
+
+                    <button
+                        id="closeKnowledgeButton"
+                        class="closeKnowledgeButton"
+                        type="button"
+                        aria-label="关闭知识库侧栏"
+                    >
+                        ×
+                    </button>
+                </div>
+            </header>
+
+            <section class="knowledgeStatsCard">
+                <div class="statsHeader">
+                    <div>
+                        <p>OVERVIEW</p>
+                        <h3>运行概览</h3>
+                    </div>
+                    <span id="statsStatus">正在加载</span>
+                </div>
+
+                <div class="statsGrid">
+                    <div>
+                        <strong id="statsDocumentCount">--</strong>
+                        <span>文档</span>
+                    </div>
+                    <div>
+                        <strong id="statsChunkCount">--</strong>
+                        <span>片段</span>
+                    </div>
+                    <div>
+                        <strong id="statsVectorCount">--</strong>
+                        <span>向量</span>
+                    </div>
+                    <div>
+                        <strong id="statsThreshold">--</strong>
+                        <span>阈值</span>
+                    </div>
+                </div>
+
+                <div class="statsDetails">
+                    <span>Top-K <strong id="statsTopK">--</strong></span>
+                    <span>相对差值 <strong id="statsScoreGap">--</strong></span>
+                    <span id="statsFormats">TXT · DOCX · PDF</span>
+                </div>
+
+                <p id="statsBuiltAt">最近建库：--</p>
+            </section>
+
+            <section class="uploadCard adminOnly">
+                <label
+                    id="dropZone"
+                    class="dropZone"
+                    for="fileInput"
+                >
+                    <input
+                        id="fileInput"
+                        type="file"
+                        accept=".txt,.docx,.pdf"
+                    >
+
+                    <span class="uploadIcon">↑</span>
+                    <strong>拖拽 TXT、DOCX 或 PDF 文件到这里</strong>
+                    <span>或点击选择本地文档</span>
+                    <span
+                        id="selectedFileName"
+                        class="selectedFileName"
+                    >
+                        暂未选择文件
+                    </span>
+                </label>
+
+                <div class="uploadControls">
+                    <label
+                        class="checkboxLabel"
+                        for="overwriteInput"
+                    >
+                        <input
+                            id="overwriteInput"
+                            type="checkbox"
+                        >
+
+                        覆盖同名文件
+                    </label>
+
+                    <button
+                        id="uploadButton"
+                        type="button"
+                    >
+                        上传并索引
+                    </button>
+                </div>
+
+                <p id="uploadStatus">
+                    支持 TXT、DOCX 和 PDF 文档，最大 10MB
+                </p>
+            </section>
+
+            <section
+                id="buildProgress"
+                class="buildProgress"
+                aria-live="polite"
+                hidden
+            >
+                <div class="buildProgressHeader">
+                    <span id="buildProgressIndicator"></span>
+                    <div>
+                        <strong id="buildProgressTitle">正在建立知识库</strong>
+                        <p id="buildProgressMessage">后端正在依次执行以下步骤</p>
+                    </div>
+                </div>
+
+                <ol id="buildProgressSteps"></ol>
+            </section>
+
+            <section class="documentCard">
+                <div class="documentHeader">
+                    <div>
+                        <p>DOCUMENTS</p>
+                        <h3>已索引文档</h3>
+                    </div>
+
+                    <span id="documentCount">
+                        正在加载……
+                    </span>
+                </div>
+
+                <div class="documentFilters">
+                    <label class="documentSearch" for="documentSearchInput">
+                        <span aria-hidden="true">⌕</span>
+                        <input
+                            id="documentSearchInput"
+                            type="search"
+                            placeholder="搜索文件名"
+                            autocomplete="off"
+                        >
+                    </label>
+
+                    <div
+                        class="formatFilters"
+                        role="group"
+                        aria-label="按文档格式筛选"
+                    >
+                        <button class="isActive" type="button" data-format="all">全部</button>
+                        <button type="button" data-format="txt">TXT</button>
+                        <button type="button" data-format="docx">DOCX</button>
+                        <button type="button" data-format="pdf">PDF</button>
+                    </div>
+                </div>
+
+                <ul id="documentList">
+                    <li class="listPlaceholder">
+                        正在加载文档列表……
+                    </li>
+                </ul>
+
+                <p id="documentStatus"></p>
+            </section>
+
+            <footer class="knowledgeFooter">
+                FastAPI · FAISS · SiliconFlow
+            </footer>
+        </aside>
+
+        <div
+            id="documentDetail"
+            class="documentDetailOverlay"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="detailFilename"
+            hidden
+        >
+            <section class="documentDetail">
+                <div class="detailHeader">
+                    <div>
+                        <p>DOCUMENT PREVIEW</p>
+                        <h3 id="detailFilename">
+                            文档详情
+                        </h3>
+                    </div>
+
+                    <button
+                        id="closeDetailButton"
+                        class="ghostButton"
+                        type="button"
+                        aria-label="关闭文档预览"
+                    >
+                        关闭
+                    </button>
+                </div>
+
+                <p id="detailMetadata"></p>
+
+                <div class="detailTabs" role="tablist">
+                    <button
+                        id="originalTextTab"
+                        class="detailTab isActive"
+                        type="button"
+                        role="tab"
+                        aria-selected="true"
+                    >
+                        原文
+                    </button>
+                    <button
+                        id="documentChunksTab"
+                        class="detailTab"
+                        type="button"
+                        role="tab"
+                        aria-selected="false"
+                    >
+                        分块 <span id="detailChunkCount">0</span>
+                    </button>
+                </div>
+
+                <pre id="detailContent"></pre>
+                <div id="detailChunks" hidden></div>
+            </section>
+        </div>
+
+        <button
+            id="sidebarBackdrop"
+            class="sidebarBackdrop"
+            type="button"
+            aria-label="关闭知识库侧栏"
+            hidden
+        ></button>
+
+        <button
+            id="conversationBackdrop"
+            class="conversationBackdrop"
+            type="button"
+            aria-label="关闭会话侧栏"
+            hidden
+        ></button>
+    </div>
+</body>
+</html>
