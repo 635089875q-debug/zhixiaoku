@@ -13,7 +13,7 @@
 - API 文档：https://zhixiaoku-production.up.railway.app/docs
 - GitHub：https://github.com/635089875q-debug/zhixiaoku
 
-> 在线服务使用 Railway 试用资源，若暂时无法访问，可按照下方说明在本地运行。
+> 在线服务使用 Railway 试用资源，若暂时无法访问，可按照下方说明在本地运行。目前只支持使用英文用户名注册。
 
 ## 项目亮点
 
