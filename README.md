@@ -3,7 +3,8 @@
 一个基于 FastAPI、MySQL、FAISS 和 OpenAI 兼容 API 构建的 RAG 知识库问答应用。项目提供完整的用户认证、多会话问答、文档管理、向量检索、来源引用和响应式 Web 界面，可用于学习资料、项目文档和企业内部知识的检索问答。
 
 > 当前版本定位为可部署的学习与作品展示项目，不是面向高并发生产环境的完整商业系统。
-> 界面：![Uploading image.png…]()
+> 界面：<img width="2864" height="1630" alt="image" src="https://github.com/user-attachments/assets/9d5bfaae-1042-4018-8f16-b36365e2d94c" />
+
 
 
 ## 在线体验
