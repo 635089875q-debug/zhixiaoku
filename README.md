@@ -3,6 +3,16 @@
 一个基于 FastAPI、MySQL、FAISS 和 OpenAI 兼容 API 构建的 RAG 知识库问答应用。项目提供完整的用户认证、多会话问答、文档管理、向量检索、来源引用和响应式 Web 界面，可用于学习资料、项目文档和企业内部知识的检索问答。
 
 > 当前版本定位为可部署的学习与作品展示项目，不是面向高并发生产环境的完整商业系统。
+> 界面：![Uploading image.png…]()
+
+
+## 在线体验
+
+- 在线演示：https://zhixiaoku-production.up.railway.app/ui/
+- API 文档：https://zhixiaoku-production.up.railway.app/docs
+- GitHub：https://github.com/635089875q-debug/zhixiaoku
+
+> 在线服务使用 Railway 试用资源，若暂时无法访问，可按照下方说明在本地运行。
 
 ## 项目亮点
 
@@ -275,7 +285,7 @@ pytest -v
 
 ## 后续计划
 
-- 使用 Railway 部署 FastAPI、MySQL 和持久化数据卷
+- 为 Railway 部署配置持久化数据卷，保存用户上传的文档与动态生成的 FAISS 索引
 - 增加流式回答与生成中断
 - 增加 OCR 和更多文档格式
 - 引入异步建库任务及任务进度查询
