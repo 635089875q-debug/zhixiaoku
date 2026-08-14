@@ -3,15 +3,16 @@ import pymysql
 from app.config import settings
 
 
-conn = pymysql.connect(
-    host=settings.MYSQL_HOST,
-    port=settings.MYSQL_PORT,
-    user=settings.MYSQL_USER,
-    password=settings.MYSQL_PASSWORD,
-    database=settings.MYSQL_TAOBAO_DATABASE,
-    charset='utf8mb4'
-)
-cursor = conn.cursor(pymysql.cursors.DictCursor)
+def get_legacy_connection():
+    return pymysql.connect(
+        host=settings.MYSQL_HOST,
+        port=settings.MYSQL_PORT,
+        user=settings.MYSQL_USER,
+        password=settings.MYSQL_PASSWORD,
+        database=settings.MYSQL_TAOBAO_DATABASE,
+        charset="utf8mb4",
+        cursorclass=pymysql.cursors.DictCursor
+    )
 
 
 def get_user_behaviour_count(user_id):
@@ -21,10 +22,14 @@ def get_user_behaviour_count(user_id):
     WHERE user_id=%s
     """
 
-    cursor.execute(sql, (user_id,))
-    result = cursor.fetchone()
-
-    return result["behavior_count"]
+    conn = get_legacy_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(sql, (user_id,))
+            result = cursor.fetchone()
+            return result["behavior_count"]
+    finally:
+        conn.close()
 
 
 def get_user_behaviours(user_id,page,size):
@@ -35,10 +40,13 @@ def get_user_behaviours(user_id,page,size):
     LIMIT %s,%s
     """
     offset = (page - 1) * size
-    cursor.execute(sql, (user_id,offset,size))
-    results = cursor.fetchall()
-
-    return results
+    conn = get_legacy_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(sql, (user_id,offset,size))
+            return cursor.fetchall()
+    finally:
+        conn.close()
 
 def add_chat_history(question,answer):
     sql = """
@@ -46,10 +54,14 @@ def add_chat_history(question,answer):
     VALUES(%s,%s)
     """
 
-    cursor.execute(sql, (question,answer))
-    conn.commit()
-
-    return cursor.lastrowid
+    conn = get_legacy_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(sql, (question,answer))
+            conn.commit()
+            return cursor.lastrowid
+    finally:
+        conn.close()
 
 def update_chat_history(chat_id,answer):
     sql = """
@@ -57,15 +69,25 @@ def update_chat_history(chat_id,answer):
     SET answer=%s
     WHERE id=%s
     """
-    cursor.execute(sql, (answer,chat_id))
-    conn.commit()
-    return cursor.rowcount
+    conn = get_legacy_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(sql, (answer,chat_id))
+            conn.commit()
+            return cursor.rowcount
+    finally:
+        conn.close()
 
 def delete_chat_history(chat_id):
     sql="""
     DELETE FROM chat_history
     WHERE id=%s
     """
-    cursor.execute(sql, (chat_id,))
-    conn.commit()
-    return cursor.rowcount
+    conn = get_legacy_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(sql, (chat_id,))
+            conn.commit()
+            return cursor.rowcount
+    finally:
+        conn.close()
